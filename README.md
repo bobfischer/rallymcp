@@ -1,6 +1,6 @@
 # Eliassen Rally MCP Server
 
-Hosted MCP server that wraps the Rally REST API for AI-driven product operations. Designed to complement the existing Rally MCP by filling operational gaps: user search, portfolio item management, artifact deletion, and attachment handling.
+Local MCP server that wraps the Rally REST API for AI-driven product operations. Designed to complement the existing Rally MCP by filling operational gaps: user search, portfolio item management, artifact deletion, and attachment handling. Runs locally — no cloud deployment needed.
 
 ## Tools
 
@@ -74,20 +74,20 @@ npm test
 
 ## Client Configuration
 
-Add this to your `claude_desktop_config.json`:
+Add this to your `claude_desktop_config.json` (adjust the path to match your machine):
 
 ```json
 {
   "mcpServers": {
     "eliassen-rally": {
-      "url": "https://your-hosted-server.com/mcp",
+      "url": "http://localhost:3000/mcp",
       "transport": "http"
     }
   }
 }
 ```
 
-No API keys in the client config — auth is handled server-side.
+The server must be running locally before starting Claude Desktop.
 
 ## Rally Environment
 
