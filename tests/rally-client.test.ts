@@ -7,7 +7,7 @@ process.env.RALLY_API_KEY = 'test-api-key';
 process.env.RALLY_WORKSPACE_REF = '843310407671';
 process.env.RALLY_PROJECT_REF = '844308252829';
 
-const { rallyGet, rallyPost, rallyPut, rallyDelete, getSecurityToken, RALLY_BASE_URL } = await import('../src/rally-client.js');
+const { rallyGet, rallyPost, rallyPut, rallyDelete, RALLY_BASE_URL } = await import('../src/rally-client.js');
 
 describe('Rally Client', () => {
   beforeEach(() => {
@@ -44,28 +44,8 @@ describe('Rally Client', () => {
     });
   });
 
-  describe('getSecurityToken', () => {
-    it('fetches and returns security token', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ OperationResult: { SecurityToken: 'abc123' } }),
-      });
-
-      const token = await getSecurityToken();
-      expect(token).toBe('abc123');
-
-      const [url, opts] = mockFetch.mock.calls[0];
-      expect(url).toContain('/security/authorize');
-      expect(opts.headers['ZSESSIONID']).toBe('test-api-key');
-    });
-  });
-
   describe('rallyPost', () => {
-    it('fetches token then POSTs with key param', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ OperationResult: { SecurityToken: 'tok123' } }),
-      });
+    it('POSTs directly with API key auth', async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: async () => ({ CreateResult: { Object: { ObjectID: 1 } } }),
@@ -73,20 +53,17 @@ describe('Rally Client', () => {
 
       const result = await rallyPost('/portfolioitem/feature', { Feature: { Name: 'Test' } });
 
-      expect(mockFetch).toHaveBeenCalledTimes(2);
-      const [postUrl, postOpts] = mockFetch.mock.calls[1];
-      expect(postUrl).toContain('key=tok123');
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+      const [postUrl, postOpts] = mockFetch.mock.calls[0];
+      expect(postUrl).toContain('/slm/webservice/v2.0/portfolioitem/feature');
       expect(postOpts.method).toBe('POST');
+      expect(postOpts.headers['ZSESSIONID']).toBe('test-api-key');
       expect(JSON.parse(postOpts.body)).toEqual({ Feature: { Name: 'Test' } });
     });
   });
 
   describe('rallyPut', () => {
-    it('fetches token then PUTs with key param', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ OperationResult: { SecurityToken: 'tok789' } }),
-      });
+    it('PUTs directly with API key auth', async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: async () => ({ OperationResult: { Object: { ObjectID: 1 }, Errors: [] } }),
@@ -94,19 +71,16 @@ describe('Rally Client', () => {
 
       const result = await rallyPut('/portfolioitem/feature/100', { Feature: { FlowState: 'ref' } });
 
-      expect(mockFetch).toHaveBeenCalledTimes(2);
-      const [putUrl, putOpts] = mockFetch.mock.calls[1];
-      expect(putUrl).toContain('key=tok789');
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+      const [putUrl, putOpts] = mockFetch.mock.calls[0];
+      expect(putUrl).toContain('/slm/webservice/v2.0/portfolioitem/feature/100');
       expect(putOpts.method).toBe('PUT');
+      expect(putOpts.headers['ZSESSIONID']).toBe('test-api-key');
     });
   });
 
   describe('rallyDelete', () => {
-    it('fetches token then DELETEs with key param', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ OperationResult: { SecurityToken: 'tok456' } }),
-      });
+    it('DELETEs directly with API key auth', async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: async () => ({ OperationResult: { Errors: [] } }),
@@ -114,9 +88,11 @@ describe('Rally Client', () => {
 
       const result = await rallyDelete('/hierarchicalrequirement/12345');
 
-      const [delUrl, delOpts] = mockFetch.mock.calls[1];
-      expect(delUrl).toContain('key=tok456');
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+      const [delUrl, delOpts] = mockFetch.mock.calls[0];
+      expect(delUrl).toContain('/slm/webservice/v2.0/hierarchicalrequirement/12345');
       expect(delOpts.method).toBe('DELETE');
+      expect(delOpts.headers['ZSESSIONID']).toBe('test-api-key');
     });
   });
 });

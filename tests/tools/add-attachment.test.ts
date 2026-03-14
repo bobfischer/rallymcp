@@ -14,9 +14,7 @@ describe('addAttachment', () => {
 
   it('creates attachment content then links it to artifact', async () => {
     mockFetch.mockResolvedValueOnce({ ok: true, json: async () => ({ QueryResult: { Results: [{ ObjectID: 100, _ref: 'https://rally1.rallydev.com/slm/webservice/v2.0/portfolioitem/feature/100', FormattedID: 'F6' }], TotalResultCount: 1 } }) });
-    mockFetch.mockResolvedValueOnce({ ok: true, json: async () => ({ OperationResult: { SecurityToken: 'tok1' } }) });
     mockFetch.mockResolvedValueOnce({ ok: true, json: async () => ({ CreateResult: { Object: { _ref: 'https://rally1.rallydev.com/slm/webservice/v2.0/attachmentcontent/900' }, Errors: [] } }) });
-    mockFetch.mockResolvedValueOnce({ ok: true, json: async () => ({ OperationResult: { SecurityToken: 'tok2' } }) });
     mockFetch.mockResolvedValueOnce({ ok: true, json: async () => ({ CreateResult: { Object: { ObjectID: 901, _ref: 'ref/901' }, Errors: [] } }) });
 
     const result = await handleAddAttachment({ formattedId: 'F6', filename: 'brief.md', content: '# Brief\nContent here', contentType: 'text/markdown' });

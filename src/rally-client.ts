@@ -9,25 +9,19 @@ const headers = (): Record<string, string> => ({
   'Content-Type': 'application/json',
 });
 
-export async function getSecurityToken(): Promise<string> {
-  const res = await fetch(`${RALLY_BASE_URL}/security/authorize`, {
-    method: 'GET',
-    headers: headers(),
-  });
-  if (!res.ok) {
-    throw new Error(`Rally auth failed: ${res.status}`);
-  }
-  const data = await res.json();
-  return data.OperationResult.SecurityToken;
-}
-
 export async function rallyGet(path: string, params: Record<string, string>): Promise<any> {
-  const url = new URL(`${RALLY_BASE_URL}${path}`);
-  for (const [key, value] of Object.entries(params)) {
-    url.searchParams.set(key, value);
-  }
+  // Build query string manually — URLSearchParams encodes slashes and commas
+  // which breaks Rally's workspace and fetch parameters
+  const queryString = Object.entries(params)
+    .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+    .join('&')
+    .replace(/%2F/gi, '/')
+    .replace(/%2C/gi, ',');
+  const url = queryString
+    ? `${RALLY_BASE_URL}${path}?${queryString}`
+    : `${RALLY_BASE_URL}${path}`;
 
-  const res = await fetch(url.toString(), {
+  const res = await fetch(url, {
     method: 'GET',
     headers: headers(),
   });
@@ -40,8 +34,7 @@ export async function rallyGet(path: string, params: Record<string, string>): Pr
 }
 
 export async function rallyPost(path: string, body: Record<string, any>): Promise<any> {
-  const token = await getSecurityToken();
-  const url = `${RALLY_BASE_URL}${path}?key=${token}`;
+  const url = `${RALLY_BASE_URL}${path}`;
 
   const res = await fetch(url, {
     method: 'POST',
@@ -57,8 +50,7 @@ export async function rallyPost(path: string, body: Record<string, any>): Promis
 }
 
 export async function rallyPut(path: string, body: Record<string, any>): Promise<any> {
-  const token = await getSecurityToken();
-  const url = `${RALLY_BASE_URL}${path}?key=${token}`;
+  const url = `${RALLY_BASE_URL}${path}`;
 
   const res = await fetch(url, {
     method: 'PUT',
@@ -74,8 +66,7 @@ export async function rallyPut(path: string, body: Record<string, any>): Promise
 }
 
 export async function rallyDelete(path: string): Promise<any> {
-  const token = await getSecurityToken();
-  const url = `${RALLY_BASE_URL}${path}?key=${token}`;
+  const url = `${RALLY_BASE_URL}${path}`;
 
   const res = await fetch(url, {
     method: 'DELETE',

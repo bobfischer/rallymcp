@@ -13,7 +13,6 @@ describe('createPortfolioItem', () => {
   beforeEach(() => { mockFetch.mockReset(); });
 
   it('creates a feature with all fields', async () => {
-    mockFetch.mockResolvedValueOnce({ ok: true, json: async () => ({ OperationResult: { SecurityToken: 'tok' } }) });
     mockFetch.mockResolvedValueOnce({ ok: true, json: async () => ({ CreateResult: { Object: { FormattedID: 'F10', ObjectID: 200, _ref: 'https://rally1.rallydev.com/slm/webservice/v2.0/portfolioitem/feature/200' }, Errors: [] } }) });
 
     const result = await handleCreatePortfolioItem({ type: 'feature', name: 'Test Feature', description: 'A description', parentRef: '/portfolioitem/initiative/50', ownerRef: '/user/111' });
@@ -21,7 +20,7 @@ describe('createPortfolioItem', () => {
     expect(parsed.formattedId).toBe('F10');
     expect(parsed.objectId).toBe(200);
 
-    const postBody = JSON.parse(mockFetch.mock.calls[1][1].body);
+    const postBody = JSON.parse(mockFetch.mock.calls[0][1].body);
     expect(postBody.Feature.Name).toBe('Test Feature');
     expect(postBody.Feature.Description).toBe('A description');
     expect(postBody.Feature.Parent).toBe('/portfolioitem/initiative/50');
@@ -29,7 +28,6 @@ describe('createPortfolioItem', () => {
   });
 
   it('creates an initiative with minimal fields', async () => {
-    mockFetch.mockResolvedValueOnce({ ok: true, json: async () => ({ OperationResult: { SecurityToken: 'tok' } }) });
     mockFetch.mockResolvedValueOnce({ ok: true, json: async () => ({ CreateResult: { Object: { FormattedID: 'I5', ObjectID: 300, _ref: 'ref/300' }, Errors: [] } }) });
 
     const result = await handleCreatePortfolioItem({ type: 'initiative', name: 'Test Initiative' });

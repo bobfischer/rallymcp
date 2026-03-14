@@ -23,8 +23,15 @@ export async function handleCreatePortfolioItem(input: {
     if (input.parentRef) body.Parent = input.parentRef;
     if (input.ownerRef) body.Owner = input.ownerRef;
 
-    const result = await rallyPost(`/portfolioitem/${input.type}`, { [typeKey]: body });
-    const obj = result.CreateResult.Object;
+    const result = await rallyPost(`/portfolioitem/${input.type}/create?fetch=FormattedID,ObjectID,_ref`, { [typeKey]: body });
+    const createResult = result.CreateResult;
+    if (createResult?.Errors?.length > 0) {
+      return { content: [{ type: 'text' as const, text: JSON.stringify({ success: false, error: createResult.Errors.join('; ') }) }] };
+    }
+    const obj = createResult?.Object;
+    if (!obj) {
+      return { content: [{ type: 'text' as const, text: JSON.stringify({ success: false, error: 'Unexpected response', response: result }) }] };
+    }
     return { content: [{ type: 'text' as const, text: JSON.stringify({ formattedId: obj.FormattedID, objectId: obj.ObjectID, ref: obj._ref }) }] };
   } catch (err: any) {
     return { content: [{ type: 'text' as const, text: JSON.stringify({ success: false, error: err.message }) }] };

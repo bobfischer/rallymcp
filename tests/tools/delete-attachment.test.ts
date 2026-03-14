@@ -13,7 +13,6 @@ describe('deleteAttachment', () => {
   beforeEach(() => { mockFetch.mockReset(); });
 
   it('deletes an attachment by ID', async () => {
-    mockFetch.mockResolvedValueOnce({ ok: true, json: async () => ({ OperationResult: { SecurityToken: 'tok' } }) });
     mockFetch.mockResolvedValueOnce({ ok: true, json: async () => ({ OperationResult: { Errors: [] } }) });
 
     const result = await handleDeleteAttachment({ attachmentId: '901' });
@@ -23,7 +22,6 @@ describe('deleteAttachment', () => {
   });
 
   it('returns error on failure', async () => {
-    mockFetch.mockResolvedValueOnce({ ok: true, json: async () => ({ OperationResult: { SecurityToken: 'tok' } }) });
     mockFetch.mockResolvedValueOnce({ ok: false, status: 404, statusText: 'Not Found', text: async () => 'Not found' });
 
     const result = await handleDeleteAttachment({ attachmentId: '999' });
