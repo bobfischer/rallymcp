@@ -76,6 +76,6 @@ app.delete('/mcp', (_req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Eliassen Rally MCP server listening on port ${PORT}`);
+app.listen(Number(PORT), '127.0.0.1', () => {
+  console.log(`Eliassen Rally MCP server listening on 127.0.0.1:${PORT}`);
 });
