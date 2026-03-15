@@ -8,6 +8,7 @@ import { registerDeleteArtifact } from './tools/delete-artifact.js';
 import { registerAddAttachment } from './tools/add-attachment.js';
 import { registerGetAttachment } from './tools/get-attachment.js';
 import { registerDeleteAttachment } from './tools/delete-attachment.js';
+import { registerBatchCreate } from './tools/batch-create.js';
 
 function createServer(): McpServer {
   const server = new McpServer({
@@ -22,6 +23,7 @@ function createServer(): McpServer {
   registerAddAttachment(server);
   registerGetAttachment(server);
   registerDeleteAttachment(server);
+  registerBatchCreate(server);
 
   return server;
 }
