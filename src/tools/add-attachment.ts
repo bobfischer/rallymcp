@@ -18,10 +18,10 @@ export async function handleAddAttachment(input: { formattedId: string; filename
     }
 
     const base64Content = Buffer.from(input.content, 'utf-8').toString('base64');
-    const contentResult = await rallyPost('/attachmentcontent', { AttachmentContent: { Content: base64Content } });
+    const contentResult = await rallyPost('/attachmentcontent/create', { AttachmentContent: { Content: base64Content } });
     const contentRef = contentResult.CreateResult.Object._ref;
 
-    const attachmentResult = await rallyPost('/attachment', {
+    const attachmentResult = await rallyPost('/attachment/create', {
       Attachment: { Artifact: artifact.ref, Content: contentRef, Name: input.filename, ContentType: input.contentType, Size: Buffer.byteLength(input.content, 'utf-8') },
     });
 
