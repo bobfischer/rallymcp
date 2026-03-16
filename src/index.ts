@@ -31,6 +31,23 @@ function createServer(): McpServer {
 const app = express();
 app.use(express.json());
 
+// Optional bearer token auth — enforced only when MCP_AUTH_TOKEN is set
+const AUTH_TOKEN = process.env.MCP_AUTH_TOKEN;
+if (AUTH_TOKEN) {
+  app.use('/mcp', (req, res, next) => {
+    const header = req.headers.authorization;
+    if (header !== `Bearer ${AUTH_TOKEN}`) {
+      res.status(401).json({
+        jsonrpc: '2.0',
+        error: { code: -32000, message: 'Unauthorized' },
+        id: null,
+      });
+      return;
+    }
+    next();
+  });
+}
+
 // Health check
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', server: 'eliassen-rally-mcp' });
@@ -78,6 +95,8 @@ app.delete('/mcp', (_req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(Number(PORT), '127.0.0.1', () => {
-  console.log(`Eliassen Rally MCP server listening on 127.0.0.1:${PORT}`);
+const HOST = process.env.HOST || '127.0.0.1';
+app.listen(Number(PORT), HOST, () => {
+  console.log(`Eliassen Rally MCP server listening on ${HOST}:${PORT}`);
+  if (AUTH_TOKEN) console.log('Bearer token auth enabled');
 });
