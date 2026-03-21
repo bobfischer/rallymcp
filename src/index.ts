@@ -9,8 +9,8 @@ import { registerAddAttachment } from './tools/add-attachment.js';
 import { registerGetAttachment } from './tools/get-attachment.js';
 import { registerDeleteAttachment } from './tools/delete-attachment.js';
 import { registerBatchCreate } from './tools/batch-create.js';
-import { registerCreateConnection } from './tools/create-connection.js';
-import { registerDeleteConnection } from './tools/delete-connection.js';
+import { registerCreateDependency } from './tools/create-connection.js';
+import { registerDeleteDependency } from './tools/delete-connection.js';
 
 const TOOL_REGISTRATIONS = [
   registerSearchUser,
@@ -21,8 +21,8 @@ const TOOL_REGISTRATIONS = [
   registerGetAttachment,
   registerDeleteAttachment,
   registerBatchCreate,
-  registerCreateConnection,
-  registerDeleteConnection,
+  registerCreateDependency,
+  registerDeleteDependency,
 ] as const;
 
 function createServer(): McpServer {
