@@ -9,6 +9,8 @@ import { registerAddAttachment } from './tools/add-attachment.js';
 import { registerGetAttachment } from './tools/get-attachment.js';
 import { registerDeleteAttachment } from './tools/delete-attachment.js';
 import { registerBatchCreate } from './tools/batch-create.js';
+import { registerCreateConnection } from './tools/create-connection.js';
+import { registerDeleteConnection } from './tools/delete-connection.js';
 
 function createServer(): McpServer {
   const server = new McpServer({
@@ -24,6 +26,8 @@ function createServer(): McpServer {
   registerGetAttachment(server);
   registerDeleteAttachment(server);
   registerBatchCreate(server);
+  registerCreateConnection(server);
+  registerDeleteConnection(server);
 
   return server;
 }
