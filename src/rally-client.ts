@@ -49,6 +49,46 @@ export async function rallyPost(path: string, body: Record<string, any>): Promis
   return res.json();
 }
 
+/**
+ * Retry a Rally write operation on concurrency errors.
+ * Rally uses optimistic concurrency — when a parent artifact is modified by
+ * a prior write, subsequent writes to the same parent can fail with a
+ * "ConcurrencyConflict" or version-mismatch error.  This wrapper retries
+ * with exponential back-off (up to 3 attempts by default).
+ */
+const CONCURRENCY_PATTERNS = [
+  /concurrency/i,
+  /version/i,
+  /could not convert/i,
+  /modified since last read/i,
+];
+
+function isConcurrencyError(err: unknown): boolean {
+  const msg = err instanceof Error ? err.message : String(err);
+  return CONCURRENCY_PATTERNS.some((re) => re.test(msg));
+}
+
+export async function withRetry<T>(
+  fn: () => Promise<T>,
+  { retries = 3, baseDelayMs = 300 } = {},
+): Promise<T> {
+  let lastErr: unknown;
+  for (let attempt = 0; attempt < retries; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      lastErr = err;
+      if (attempt < retries - 1 && isConcurrencyError(err)) {
+        const delay = baseDelayMs * 2 ** attempt;
+        await new Promise((r) => setTimeout(r, delay));
+        continue;
+      }
+      throw err;
+    }
+  }
+  throw lastErr; // unreachable, but satisfies TS
+}
+
 export async function rallyPut(path: string, body: Record<string, any>): Promise<any> {
   const url = `${RALLY_BASE_URL}${path}`;
 

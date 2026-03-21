@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { rallyGet, rallyPost, PROJECT_REF, RALLY_BASE_URL } from '../rally-client.js';
+import { rallyGet, rallyPost, PROJECT_REF, RALLY_BASE_URL, withRetry } from '../rally-client.js';
 import { resolveArtifact } from '../resolve-artifact.js';
 
 // ---------------------------------------------------------------------------
@@ -154,10 +154,10 @@ async function createFeature(
   };
   if (description) body.Description = description;
 
-  const result = await rallyPost(
+  const result = await withRetry(() => rallyPost(
     '/portfolioitem/feature/create?fetch=FormattedID,ObjectID,_ref,Name',
     { Feature: body },
-  );
+  ));
   const cr = result.CreateResult;
   if (cr?.Errors?.length > 0) throw new Error(cr.Errors.join('; '));
   const obj = cr?.Object;
@@ -179,10 +179,10 @@ async function createStory(
   };
   if (description) body.Description = description;
 
-  const result = await rallyPost(
+  const result = await withRetry(() => rallyPost(
     '/hierarchicalrequirement/create?fetch=FormattedID,ObjectID,_ref,Name',
     { HierarchicalRequirement: body },
-  );
+  ));
   const cr = result.CreateResult;
   if (cr?.Errors?.length > 0) throw new Error(cr.Errors.join('; '));
   const obj = cr?.Object;
@@ -204,10 +204,10 @@ async function createTask(
   };
   if (description) body.Description = description;
 
-  const result = await rallyPost(
+  const result = await withRetry(() => rallyPost(
     '/task/create?fetch=FormattedID,ObjectID,_ref,Name',
     { Task: body },
-  );
+  ));
   const cr = result.CreateResult;
   if (cr?.Errors?.length > 0) throw new Error(cr.Errors.join('; '));
   const obj = cr?.Object;
