@@ -12,22 +12,28 @@ import { registerBatchCreate } from './tools/batch-create.js';
 import { registerCreateConnection } from './tools/create-connection.js';
 import { registerDeleteConnection } from './tools/delete-connection.js';
 
+const TOOL_REGISTRATIONS = [
+  registerSearchUser,
+  registerMovePortfolioItem,
+  registerCreatePortfolioItem,
+  registerDeleteArtifact,
+  registerAddAttachment,
+  registerGetAttachment,
+  registerDeleteAttachment,
+  registerBatchCreate,
+  registerCreateConnection,
+  registerDeleteConnection,
+] as const;
+
 function createServer(): McpServer {
   const server = new McpServer({
     name: 'eliassen-rally',
     version: '1.0.0',
   });
 
-  registerSearchUser(server);
-  registerMovePortfolioItem(server);
-  registerCreatePortfolioItem(server);
-  registerDeleteArtifact(server);
-  registerAddAttachment(server);
-  registerGetAttachment(server);
-  registerDeleteAttachment(server);
-  registerBatchCreate(server);
-  registerCreateConnection(server);
-  registerDeleteConnection(server);
+  for (const register of TOOL_REGISTRATIONS) {
+    register(server);
+  }
 
   return server;
 }
@@ -103,4 +109,8 @@ const HOST = process.env.HOST || '127.0.0.1';
 app.listen(Number(PORT), HOST, () => {
   console.log(`Eliassen Rally MCP server listening on ${HOST}:${PORT}`);
   if (AUTH_TOKEN) console.log('Bearer token auth enabled');
+  const toolNames = TOOL_REGISTRATIONS.map((fn) =>
+    fn.name.replace(/^register/, '').replace(/^./, (c) => c.toLowerCase()),
+  );
+  console.log(`Tools (${toolNames.length}): ${toolNames.join(', ')}`);
 });
